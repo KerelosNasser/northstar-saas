@@ -1,0 +1,22 @@
+schema: spec-driven
+
+context: |
+  Northstar is a frontend showcase for a Fiverr portfolio: six Figma-designed
+  screens implemented as a faithful, interactive, responsive Next.js app.
+
+  Source of truth is the Figma file zcw1G3rW1bUCPvXIW1fiW4. Do not invent
+  product features or restyle screens away from the reference. When a detail is
+  not in the reference (dark theme, mobile layouts), extend the existing visual
+  language rather than introducing a new one.
+
+  There is no backend. All data is typed local mock data in lib/data. Anything
+  simulated must be labelled as simulated in the UI — never imply a real email,
+  model call, deletion or payment happened.
+
+  Every interactive element must work, be disabled with a reason, or not exist.
+
+rules:
+  proposal:
+    - State what is explicitly out of scope
+  tasks:
+    - Group tasks by screen or foundation layer, one reviewable increment each
