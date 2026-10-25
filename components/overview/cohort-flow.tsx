@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cohortLegend, cohortWeeks } from "@/lib/data/overview";
 import { cn } from "@/lib/utils";
 
-const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"] as const;
+const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--warning)", "var(--danger)"] as const;
 
 export function CohortFlow() {
   const max = Math.max(

@@ -111,26 +111,34 @@ export const trajectoryVariants = {
   revenue: {
     label: "Total Revenue",
     scale: 1,
+    domain: [0, 160000] as [number, number],
+    ticks: [0, 40000, 80000, 120000, 160000],
     format: (value: number) => `$${Math.round(value).toLocaleString("en-US")}`,
     axis: (value: number) => `$${Math.round(value / 1000)}K`,
   },
   mrr: {
     label: "MRR Growth",
     scale: 0.62,
+    domain: [0, 100000] as [number, number],
+    ticks: [0, 25000, 50000, 75000, 100000],
     format: (value: number) => `$${Math.round(value).toLocaleString("en-US")}`,
     axis: (value: number) => `$${Math.round(value / 1000)}K`,
   },
   arpu: {
     label: "ARPU",
     scale: 0.00072,
+    domain: [0, 120] as [number, number],
+    ticks: [0, 30, 60, 90, 120],
     format: (value: number) => `$${value.toFixed(2)}`,
     axis: (value: number) => `$${value.toFixed(0)}`,
   },
   ltv: {
     label: "LTV",
     scale: 0.0072,
+    domain: [0, 1200] as [number, number],
+    ticks: [0, 300, 600, 900, 1200],
     format: (value: number) => `$${Math.round(value).toLocaleString("en-US")}`,
-    axis: (value: number) => `$${Math.round(value / 1000)}K`,
+    axis: (value: number) => (value >= 1000 ? `$${(value / 1000).toFixed(1)}K` : `$${value}`),
   },
 } as const;
 
@@ -160,15 +168,15 @@ export const planDistribution = {
 export const cohortWeeks = [
   { label: "Week 1 (Nov 1–7)", net: "+31 net", peak: false, new: 24, expansion: 18, contraction: 6, churn: 5 },
   { label: "Week 2 (Nov 8–14)", net: "+41 net", peak: false, new: 30, expansion: 22, contraction: 5, churn: 6 },
-  { label: "Week 3 (Nov 15–21)", net: "+54 net (Peak)", peak: true, new: 38, expansion: 26, contraction: 6, churn: 5 },
-  { label: "Week 4 (Nov 22–30)", net: "+47 net", peak: false, new: 33, expansion: 24, contraction: 5, churn: 6 },
+  { label: "Week 3 (Nov 15–21)", net: "+54 net (Peak)", peak: true, new: 39, expansion: 26, contraction: 6, churn: 5 },
+  { label: "Week 4 (Nov 22–30)", net: "+47 net", peak: false, new: 34, expansion: 24, contraction: 5, churn: 6 },
 ];
 
 export const cohortLegend = [
   { label: "New", color: "var(--chart-1)" },
   { label: "Expansion", color: "var(--chart-2)" },
-  { label: "Contraction", color: "var(--chart-3)" },
-  { label: "Churn", color: "var(--chart-4)" },
+  { label: "Contraction", color: "var(--warning)" },
+  { label: "Churn", color: "var(--danger)" },
 ];
 
 export type ActivityEntry = {

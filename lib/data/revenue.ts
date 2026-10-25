@@ -81,7 +81,7 @@ export const waterfallSteps: WaterfallStep[] = [
 export const waterfallLegend = [
   { label: "Baseline", color: "var(--chart-1)" },
   { label: "Expansions", color: "var(--chart-2)" },
-  { label: "Contractions", color: "var(--chart-3)" },
+  { label: "Contractions", color: "var(--danger)" },
   { label: "Final MRR", color: "var(--chart-5)" },
 ];
 

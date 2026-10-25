@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Network } from "lucide-react";
+import { ArrowDown, Network } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -60,7 +60,7 @@ export function CausalGraphCards() {
                   </div>
 
                   <div className="flex items-center gap-2 pl-2 text-muted">
-                    <ArrowRight className="size-3 text-faint" />
+                    <ArrowDown className="size-3 text-faint" />
                     <span className="text-[10px] text-ink-2">Mediated through</span>
                   </div>
 
@@ -72,7 +72,7 @@ export function CausalGraphCards() {
                   </div>
 
                   <div className="flex items-center gap-2 pl-2 text-muted">
-                    <ArrowRight className="size-3 text-faint" />
+                    <ArrowDown className="size-3 text-faint" />
                     <span className="text-[10px] text-ink-2">Yields revenue shift</span>
                   </div>
 

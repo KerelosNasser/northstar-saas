@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
 import { Sparkline } from "@/components/charts/sparkline";
 import { Card } from "@/components/ui/card";
@@ -24,8 +24,19 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
             {kpi.valueBadge}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-0.5 rounded-md bg-success-soft px-1.5 py-0.5 text-[11px] font-medium text-success">
-            <ArrowUpRight className="size-3" aria-hidden="true" />
+          <span
+            className={cn(
+              "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
+              kpi.delta.startsWith("-")
+                ? "bg-danger-soft text-danger"
+                : "bg-success-soft text-success",
+            )}
+          >
+            {kpi.delta.startsWith("-") ? (
+              <ArrowDownRight className="size-3" aria-hidden="true" />
+            ) : (
+              <ArrowUpRight className="size-3" aria-hidden="true" />
+            )}
             {kpi.delta}
           </span>
         )}

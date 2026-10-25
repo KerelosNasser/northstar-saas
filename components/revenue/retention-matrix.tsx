@@ -9,13 +9,22 @@ const MONTHS = Array.from({ length: 12 }, (_, index) => `M${index}`);
 
 /** Buckets net MRR retention into the reference's risk ramp. */
 function toneFor(value: number) {
-  if (value >= 120) return "bg-[#0b1c30] text-white";
-  if (value >= 110) return "bg-[#3b4f78] text-white";
-  if (value >= 100) return "bg-[#7c8bb0] text-white";
-  if (value >= 95) return "bg-[#c7d2fe] text-ink";
-  if (value >= 85) return "bg-[#e6e9fb] text-ink";
-  return "bg-[#f5d9d5] text-ink";
+  if (value >= 120) return "bg-[#0b1c30] text-white dark:bg-[#152338] dark:text-white";
+  if (value >= 110) return "bg-[#3b4f78] text-white dark:bg-[#2e4063] dark:text-white";
+  if (value >= 100) return "bg-[#7c8bb0] text-white dark:bg-[#3b4f78] dark:text-white";
+  if (value >= 95) return "bg-[#c7d2fe] text-[#1e293b] dark:bg-[#253358] dark:text-[#e2e8f0]";
+  if (value >= 85) return "bg-[#e6e9fb] text-[#2d3a6e] dark:bg-[#1a233d] dark:text-[#cbd5e1]";
+  return "bg-[#f5d9d5] text-[#912018] dark:bg-[#451d1d] dark:text-[#fda29b]";
 }
+
+const LEGEND_TONES = [
+  "bg-[#f5d9d5] dark:bg-[#451d1d]",
+  "bg-[#e6e9fb] dark:bg-[#1a233d]",
+  "bg-[#c7d2fe] dark:bg-[#253358]",
+  "bg-[#7c8bb0] dark:bg-[#3b4f78]",
+  "bg-[#3b4f78] dark:bg-[#2e4063]",
+  "bg-[#0b1c30] dark:bg-[#152338]",
+];
 
 export function RetentionMatrix() {
   const { formatMoney } = useRevenueCurrency();
@@ -30,11 +39,9 @@ export function RetentionMatrix() {
         <div className="hidden items-center gap-1.5 sm:flex">
           <span className="text-[10px] uppercase tracking-[0.44px] text-muted">Churn risk (&lt;85%)</span>
           <span className="flex overflow-hidden rounded-sm">
-            {["bg-[#f5d9d5]", "bg-[#e6e9fb]", "bg-[#c7d2fe]", "bg-[#7c8bb0]", "bg-[#3b4f78]", "bg-[#0b1c30]"].map(
-              (tone) => (
-                <span key={tone} className={cn("size-3", tone)} aria-hidden="true" />
-              ),
-            )}
+            {LEGEND_TONES.map((tone) => (
+              <span key={tone} className={cn("size-3", tone)} aria-hidden="true" />
+            ))}
           </span>
           <span className="text-[10px] uppercase tracking-[0.44px] text-muted">Expansion (120%+)</span>
         </div>

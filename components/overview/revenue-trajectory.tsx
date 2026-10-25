@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -22,6 +22,21 @@ const X_TICKS = [1, 6, 12, 18, 24, 30];
 export function RevenueTrajectory() {
   const [variant, setVariant] = useState<TrajectoryVariant>("revenue");
   const active = trajectoryVariants[variant];
+
+  const scaledSeries = useMemo(() => {
+    return VARIANTS.reduce<Record<TrajectoryVariant, { day: number; current: number; prior: number }[]>>(
+      (acc, key) => {
+        const scale = trajectoryVariants[key].scale;
+        acc[key] = trajectorySeries.map((pt) => ({
+          day: pt.day,
+          current: Number((pt.current * scale).toFixed(2)),
+          prior: Number((pt.prior * scale).toFixed(2)),
+        }));
+        return acc;
+      },
+      {} as Record<TrajectoryVariant, { day: number; current: number; prior: number }[]>,
+    );
+  }, []);
 
   return (
     <Card className="xl:col-span-2">
@@ -48,8 +63,8 @@ export function RevenueTrajectory() {
           {VARIANTS.map((key) => (
             <TabsContent key={key} value={key} className="mt-3">
               <div className="h-64 w-full sm:h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trajectorySeries} margin={{ top: 18, right: 8, bottom: 0, left: 0 }}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+                  <AreaChart data={scaledSeries[key]} margin={{ top: 18, right: 8, bottom: 0, left: 0 }}>
                     <defs>
                       <linearGradient id={`trajectory-fill-${key}`} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="var(--chart-5)" stopOpacity={0.22} />
@@ -69,7 +84,8 @@ export function RevenueTrajectory() {
                       dy={6}
                     />
                     <YAxis
-                      ticks={[0, 40000, 80000, 120000, 150000]}
+                      domain={trajectoryVariants[key].domain}
+                      ticks={trajectoryVariants[key].ticks}
                       tickFormatter={(value: number) => trajectoryVariants[key].axis(value)}
                       tickLine={false}
                       axisLine={false}
@@ -77,17 +93,19 @@ export function RevenueTrajectory() {
                       tick={{ fill: "var(--muted)", fontSize: 11 }}
                     />
 
-                    <ReferenceLine
-                      x={18}
-                      stroke="var(--muted)"
-                      strokeDasharray="4 4"
-                      label={{
-                        value: "Day 18: $80K launch",
-                        position: "insideTopLeft",
-                        fill: "var(--ink-2)",
-                        fontSize: 10,
-                      }}
-                    />
+                    {key === "revenue" ? (
+                      <ReferenceLine
+                        x={18}
+                        stroke="var(--muted)"
+                        strokeDasharray="4 4"
+                        label={{
+                          value: "Day 18: $80K launch",
+                          position: "insideTopLeft",
+                          fill: "var(--ink-2)",
+                          fontSize: 10,
+                        }}
+                      />
+                    ) : null}
 
                     <Tooltip content={<TrajectoryTooltip variant={key} />} cursor={{ stroke: "var(--border-strong)" }} />
 
