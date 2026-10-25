@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -14,6 +15,7 @@ import {
 } from "recharts";
 import { ChevronDown } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -23,16 +25,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useRevenueCurrency } from "@/lib/currency";
-import { waterfallLegend, waterfallSteps } from "@/lib/data/revenue";
-
-const emptySubscribe = () => () => {};
+import { movementRows, type MovementRow, waterfallLegend, waterfallSteps } from "@/lib/data/revenue";
+import { cn } from "@/lib/utils";
 
 function useMounted() {
-  return useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  return mounted;
 }
 
 const VIEWS = [
@@ -47,6 +48,13 @@ const COLOR: Record<string, string> = {
   increase: "var(--chart-2)",
   decrease: "var(--danger)",
   total: "var(--chart-5)",
+};
+
+const TONE: Record<MovementRow["tone"], "success" | "danger" | "neutral" | "warning"> = {
+  success: "success",
+  danger: "danger",
+  neutral: "neutral",
+  warning: "warning",
 };
 
 function WaterfallTick({
@@ -64,13 +72,49 @@ function WaterfallTick({
       <text
         x={0}
         y={0}
-        dy={12}
+        dy={14}
         textAnchor="middle"
         className="fill-[var(--muted)] text-[10px] sm:text-[11px]"
       >
         {label}
       </text>
     </g>
+  );
+}
+
+function BarTopLabel(props: {
+  x?: number;
+  y?: number;
+  width?: number;
+  value?: string | number;
+  view?: View;
+  kind?: string;
+}) {
+  const { x, y, width, value, view, kind } = props;
+  if (value === undefined || value === null || typeof x !== "number" || typeof y !== "number") return null;
+  const str = String(value);
+  const isPositive = str.startsWith("+");
+  const isNegative = str.startsWith("-");
+  const fill = isPositive
+    ? "#10b981"
+    : isNegative
+      ? "#ef4444"
+      : "var(--ink)";
+
+  // In Bridge view, delta labels align gracefully across the upper guide line matching Figma
+  const isMovement = kind === "increase" || kind === "decrease";
+  const targetY = view === "bridge" && isMovement ? 42 : y - 8;
+
+  return (
+    <text
+      x={x + (width ?? 0) / 2}
+      y={targetY}
+      fill={fill}
+      textAnchor="middle"
+      className="text-[10px] font-semibold tracking-tight sm:text-[11px]"
+    >
+      {str}
+    </text>
   );
 }
 
@@ -110,13 +154,14 @@ export function MrrWaterfall() {
           return { rows: acc.rows, running: nextRunning };
         }
 
-        // Bridge view calculation:
-        // For increases: base is previous running total, bar is positive converted
-        // For decreases: base is new lower running total, bar is absolute converted
         const fromVal = acc.running;
         const nextRunning = acc.running + converted;
         const toVal = nextRunning;
-        const base = converted >= 0 ? fromVal : toVal;
+
+        // In Figma reference, movement components anchor to the 40k baseline:
+        // positive deltas rise upward from 40k, negative deltas hang downward from 40k
+        const BASELINE_Y = 40_000 * currency.rate;
+        const base = converted >= 0 ? BASELINE_Y : BASELINE_Y - Math.abs(converted);
         const bar = Math.abs(converted);
 
         acc.rows.push({
@@ -137,24 +182,36 @@ export function MrrWaterfall() {
   }, [currency.rate]);
 
   const chartData = useMemo(() => {
+    const formatBarValue = (val: number, isDelta = false) => {
+      const abs = Math.abs(val);
+      const formatted = `${currency.symbol}${(abs / 1000).toFixed(1)}k`;
+      if (!isDelta) return formatted;
+      return val >= 0 ? `+${formatted}` : `-${formatted}`;
+    };
+
     if (view === "bridge") {
-      return data.map((point) => ({
-        ...point,
-        label: point.shortLabel,
-      }));
+      return data.map((point) => {
+        const isBaselineOrTotal = point.kind === "baseline" || point.kind === "total";
+        return {
+          ...point,
+          label: point.shortLabel,
+          displayValue: formatBarValue(point.convertedValue, !isBaselineOrTotal),
+        };
+      });
     }
-    // Cumulative view: every bar starts at base 0 and goes up to running total
+
     return data.map((point) => ({
       ...point,
       base: 0,
       bar: point.running,
       label: point.shortLabel,
+      displayValue: formatBarValue(point.running, false),
     }));
-  }, [data, view]);
+  }, [data, view, currency.symbol]);
 
   const activeView = VIEWS.find((item) => item.id === view) ?? VIEWS[0];
 
-  const yDomain: [number, number] = [0, Math.round(160_000 * currency.rate)];
+  const yDomain: [number, number] = [0, Math.round(175_000 * currency.rate)];
   const yTicks = [0, 40_000, 80_000, 120_000, 160_000].map((t) =>
     Math.round(t * currency.rate),
   );
@@ -165,33 +222,33 @@ export function MrrWaterfall() {
   };
 
   return (
-    <Card className="min-w-0 xl:col-span-2">
-      <CardHeader className="flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="min-w-0 w-full">
+      <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>MRR movement waterfall</CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle>MRR Movement Waterfall</CardTitle>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="sm" className="h-6 gap-1 rounded-full px-2.5 text-[11px] font-medium">
+                  {activeView.label}
+                  <ChevronDown className="size-3" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {VIEWS.map((item) => (
+                  <DropdownMenuItem key={item.id} onSelect={() => setView(item.id)}>
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <p className="mt-0.5 text-[12px] text-muted">
-            Net new recurring revenue by component, current period
+            Stepwise accounting from Beginning MRR ($131.9k) to Ending MRR ($148.3k)
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="sm">
-              {activeView.label}
-              <ChevronDown className="size-3.5" aria-hidden="true" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {VIEWS.map((item) => (
-              <DropdownMenuItem key={item.id} onSelect={() => setView(item.id)}>
-                {item.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </CardHeader>
 
-      <CardContent className="pt-0">
-        <ul className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {waterfallLegend.map((item) => (
             <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-muted">
               <span
@@ -203,7 +260,9 @@ export function MrrWaterfall() {
             </li>
           ))}
         </ul>
+      </CardHeader>
 
+      <CardContent className="pt-0 space-y-6">
         <div className="h-64 sm:h-72">
           {!mounted ? (
             <div className="flex h-full w-full items-center justify-center rounded-lg border border-border-base bg-surface-2/40 text-[12px] text-muted">
@@ -213,7 +272,7 @@ export function MrrWaterfall() {
             <ResponsiveContainer width="100%" height="100%" minHeight={250}>
               <BarChart
                 data={chartData}
-                margin={{ top: 8, right: 8, bottom: 4, left: 0 }}
+                margin={{ top: 20, right: 12, bottom: 4, left: 0 }}
                 barCategoryGap="28%"
               >
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -252,6 +311,20 @@ export function MrrWaterfall() {
                   radius={[3, 3, 0, 0]}
                   isAnimationActive={false}
                 >
+                  <LabelList
+                    dataKey="displayValue"
+                    position="top"
+                    content={(labelProps: any) => {
+                      const item = chartData[labelProps.index];
+                      return (
+                        <BarTopLabel
+                          {...labelProps}
+                          view={view}
+                          kind={item?.kind}
+                        />
+                      );
+                    }}
+                  />
                   {chartData.map((point) => (
                     <Cell key={point.id} fill={COLOR[point.kind]} />
                   ))}
@@ -261,11 +334,72 @@ export function MrrWaterfall() {
           )}
         </div>
 
-        <p className="mt-2 text-[11px] text-muted">
+        <p className="text-[11px] text-muted">
           {view === "bridge"
             ? "Bridge view: Starting MRR bridges across net expansion and churn to Ending MRR."
             : "Cumulative view: Total active MRR progression after each component."}
         </p>
+
+        <div className="border-t border-border-base pt-4">
+          <div className="overflow-x-auto scroll-thin">
+            <table className="w-full min-w-[560px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-border-base">
+                  <th scope="col" className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.55px] text-muted">
+                    Component
+                  </th>
+                  <th scope="col" className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.55px] text-muted">
+                    Value ($)
+                  </th>
+                  <th scope="col" className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.55px] text-muted">
+                    % of Base
+                  </th>
+                  <th scope="col" className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.55px] text-muted">
+                    MoM delta
+                  </th>
+                  <th scope="col" className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.55px] text-muted">
+                    Status impact
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {movementRows.map((row) => {
+                  const displayVal = formatMoney(row.valueUsd * currency.rate, { sign: true });
+                  const isNegative = row.tone === "danger" || row.tone === "warning";
+
+                  return (
+                    <tr
+                      key={row.id}
+                      className="border-b border-border-base/50 last:border-0 hover:bg-surface-2/40 transition-colors"
+                    >
+                      <th scope="row" className="flex items-center gap-2 px-3 py-2.5 text-[12px] font-medium text-ink">
+                        <span
+                          className={cn("size-2 rounded-full", isNegative ? "bg-[#ef4444]" : "bg-[#10b981]")}
+                          aria-hidden="true"
+                        />
+                        {row.component}
+                      </th>
+                      <td className="tnum whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold text-ink">
+                        {displayVal}
+                      </td>
+                      <td className="tnum whitespace-nowrap px-3 py-2.5 text-[12px] text-ink-2">
+                        {row.shareOfBaseline}
+                      </td>
+                      <td className="tnum whitespace-nowrap px-3 py-2.5 text-[12px] text-ink-2">
+                        {row.momDelta}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Badge variant={TONE[row.tone]} className="text-[11px] font-medium">
+                          {row.impact}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

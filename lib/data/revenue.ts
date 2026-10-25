@@ -97,11 +97,11 @@ export type MovementRow = {
 };
 
 export const movementRows: MovementRow[] = [
-  { id: "new", component: "New MRR", valueUsd: 14200, value: "+$14,200", shareOfBaseline: "10.8%", momDelta: "+2.2%", impact: "Strong intake", tone: "success" },
-  { id: "expansion", component: "Expansion MRR", valueUsd: 11400, value: "+$11,400", shareOfBaseline: "8.6%", momDelta: "+34.5%", impact: "Outperformer", tone: "success" },
-  { id: "reactivation", component: "Reactivation MRR", valueUsd: 1300, value: "+$1,300", shareOfBaseline: "1.0%", momDelta: "-2.1%", impact: "Normal flow", tone: "neutral" },
-  { id: "contraction", component: "Contraction MRR", valueUsd: -4200, value: "-$4,200", shareOfBaseline: "-3.2%", momDelta: "-12.0% (improved)", impact: "Under control", tone: "warning" },
-  { id: "churn", component: "Full churn MRR", valueUsd: -6350, value: "-$6,350", shareOfBaseline: "-4.8%", momDelta: "+0.9%", impact: "Monitor", tone: "danger" },
+  { id: "new", component: "New MRR", valueUsd: 14200, value: "+$14,200", shareOfBaseline: "10.76%", momDelta: "+5.2%", impact: "Strong intake", tone: "success" },
+  { id: "expansion", component: "Expansion MRR", valueUsd: 11400, value: "+$11,400", shareOfBaseline: "8.64%", momDelta: "+34.0%", impact: "Outperformer", tone: "success" },
+  { id: "reactivation", component: "Reactivation MRR", valueUsd: 1100, value: "+$1,100", shareOfBaseline: "0.83%", momDelta: "-2.1%", impact: "Normal Flow", tone: "neutral" },
+  { id: "contraction", component: "Contraction MRR", valueUsd: -4200, value: "-$4,200", shareOfBaseline: "-3.18%", momDelta: "-12.5% (Improved)", impact: "Under Control", tone: "warning" },
+  { id: "churn", component: "Full churn MRR", valueUsd: -6100, value: "-$6,100", shareOfBaseline: "-4.62%", momDelta: "+4.1%", impact: "Monitor", tone: "danger" },
 ];
 
 export type RetentionCohort = {
@@ -109,17 +109,17 @@ export type RetentionCohort = {
   month: string;
   startingMrrUsd: number;
   startingMrr: string;
-  /** M0..M11 net MRR retained, as percentages. */
-  retention: number[];
+  /** M0..M11 net MRR retained, as percentages. null represents unelapsed future billing periods. */
+  retention: (number | null)[];
 };
 
 export const retentionCohorts: RetentionCohort[] = [
-  { id: "nov-24", month: "Nov 2024", startingMrrUsd: 12410, startingMrr: "$12,410", retention: [100, 96, 99, 104, 108, 112, 115, 118, 121, 119, 124, 127] },
-  { id: "dec-24", month: "Dec 2024", startingMrrUsd: 14120, startingMrr: "$14,120", retention: [100, 98, 101, 105, 109, 111, 114, 116, 120, 118, 122, 125] },
-  { id: "jan-25", month: "Jan 2025", startingMrrUsd: 16600, startingMrr: "$16,600", retention: [100, 97, 100, 103, 107, 110, 113, 117, 115, 119, 123, 121] },
-  { id: "feb-25", month: "Feb 2025", startingMrrUsd: 15200, startingMrr: "$15,200", retention: [100, 99, 102, 106, 110, 108, 112, 116, 114, 118, 122, 120] },
-  { id: "mar-25", month: "Mar 2025", startingMrrUsd: 21100, startingMrr: "$21,100", retention: [100, 101, 104, 108, 112, 115, 119, 117, 121, 125, 123, 127] },
-  { id: "apr-25", month: "Apr 2025", startingMrrUsd: 18400, startingMrr: "$18,400", retention: [100, 98, 102, 105, 109, 112, 110, 114, 118, 116, 120, 124] },
+  { id: "nov-24", month: "Nov 2024", startingMrrUsd: 12450, startingMrr: "$12,450", retention: [100, 92, 95, 84, 92, 91, 89, 88, 92, 102, 101, 107] },
+  { id: "dec-24", month: "Dec 2024", startingMrrUsd: 14100, startingMrr: "$14,100", retention: [100, 97, 94, 82, 90, 88, 87, 91, 96, 101, 105, null] },
+  { id: "jan-25", month: "Jan 2025", startingMrrUsd: 16600, startingMrr: "$16,600", retention: [100, 99, 97, 85, 93, 94, 101, 106, 112, null, null, null] },
+  { id: "feb-25", month: "Feb 2025", startingMrrUsd: 15200, startingMrr: "$15,200", retention: [100, 96, 94, 82, 89, 93, 103, 108, null, null, null, null] },
+  { id: "mar-25", month: "Mar 2025", startingMrrUsd: 21100, startingMrr: "$21,100", retention: [100, 98, 96, 85, 101, 105, 114, null, null, null, null, null] },
+  { id: "apr-25", month: "Apr 2025", startingMrrUsd: 18400, startingMrr: "$18,400", retention: [100, 97, 95, 82, 97, 104, null, null, null, null, null, null] },
 ];
 
 export type Subscription = {

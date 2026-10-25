@@ -73,7 +73,7 @@ export const overviewKpis: Kpi[] = [
 ];
 
 export const aiObservation = {
-  confidence: "84%",
+  confidence: "94%",
   detected: "Detected 3 hours ago via Okta audit logs",
   headline: "Expansion revenue accelerated by 28% following Enterprise SSO launch",
   body: "34 mid-market accounts upgraded to Enterprise tier in the last 14 days after adopting Okta/SAML integration. Primary revenue driver was EMEA sales cycle shortening from 42 to 19 days.",
@@ -168,15 +168,15 @@ export const planDistribution = {
 export const cohortWeeks = [
   { label: "Week 1 (Nov 1–7)", net: "+31 net", peak: false, new: 24, expansion: 18, contraction: 6, churn: 5 },
   { label: "Week 2 (Nov 8–14)", net: "+41 net", peak: false, new: 30, expansion: 22, contraction: 5, churn: 6 },
-  { label: "Week 3 (Nov 15–21)", net: "+54 net (Peak)", peak: true, new: 39, expansion: 26, contraction: 6, churn: 5 },
+  { label: "Week 3 (Nov 15–21)", net: "+54 net (Peak)", peak: true, new: 0, expansion: 65, contraction: 6, churn: 5 },
   { label: "Week 4 (Nov 22–30)", net: "+47 net", peak: false, new: 34, expansion: 24, contraction: 5, churn: 6 },
 ];
 
 export const cohortLegend = [
-  { label: "New", color: "var(--chart-1)" },
-  { label: "Expansion", color: "var(--chart-2)" },
-  { label: "Contraction", color: "var(--warning)" },
-  { label: "Churn", color: "var(--danger)" },
+  { label: "New (+42)", color: "#047857" },
+  { label: "Expansion (+18)", color: "#4f46e5" },
+  { label: "Contraction (-5)", color: "#38bdf8" },
+  { label: "Churn (-8)", color: "#ef4444" },
 ];
 
 export type ActivityEntry = {

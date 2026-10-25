@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/shell/page-header";
 import { MrrWaterfall } from "@/components/revenue/mrr-waterfall";
-import { MovementTable } from "@/components/revenue/movement-table";
 import { RetentionMatrix } from "@/components/revenue/retention-matrix";
 import { RevenueKpiRow } from "@/components/revenue/revenue-kpis";
 import { SubscriptionsTable } from "@/components/revenue/subscriptions-table";
@@ -24,10 +23,7 @@ export default function RevenuePage() {
 
         <RevenueKpiRow />
 
-        <div className="grid min-w-0 gap-4 xl:grid-cols-3">
-          <MrrWaterfall />
-          <MovementTable />
-        </div>
+        <MrrWaterfall />
 
         <RetentionMatrix />
 

@@ -134,7 +134,11 @@ function exportRevenueCsv(
     ...movementRows.map((row) => [row.component, formatMoney(row.valueUsd, { sign: true }), row.shareOfBaseline, row.momDelta, row.impact]),
     [],
     ["Cohort", "Starting MRR", ...Array.from({ length: 12 }, (_, index) => `M${index}`)],
-    ...retentionCohorts.map((cohort) => [cohort.month, formatMoney(cohort.startingMrrUsd), ...cohort.retention]),
+    ...retentionCohorts.map((cohort) => [
+      cohort.month,
+      formatMoney(cohort.startingMrrUsd),
+      ...cohort.retention.map((v) => (v === null ? "" : v)),
+    ]),
     [],
     ["Customer", "Plan", "Cycle", "MRR", "LTV", "Movement", "Renewal"],
     ...subscriptions.map((row) => [

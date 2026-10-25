@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRevenueCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
@@ -7,23 +8,20 @@ import { retentionCohorts } from "@/lib/data/revenue";
 
 const MONTHS = Array.from({ length: 12 }, (_, index) => `M${index}`);
 
-/** Buckets net MRR retention into the reference's risk ramp. */
-function toneFor(value: number) {
-  if (value >= 120) return "bg-[#0b1c30] text-white dark:bg-[#152338] dark:text-white";
-  if (value >= 110) return "bg-[#3b4f78] text-white dark:bg-[#2e4063] dark:text-white";
-  if (value >= 100) return "bg-[#7c8bb0] text-white dark:bg-[#3b4f78] dark:text-white";
-  if (value >= 95) return "bg-[#c7d2fe] text-[#1e293b] dark:bg-[#253358] dark:text-[#e2e8f0]";
-  if (value >= 85) return "bg-[#e6e9fb] text-[#2d3a6e] dark:bg-[#1a233d] dark:text-[#cbd5e1]";
-  return "bg-[#f5d9d5] text-[#912018] dark:bg-[#451d1d] dark:text-[#fda29b]";
+/** Buckets net MRR retention into Figma reference color scale. */
+function toneFor(value: number | null) {
+  if (value === null) return "bg-surface-2/40 text-muted/50 dark:bg-surface-2/20 dark:text-muted/40";
+  if (value >= 100) return "bg-[#3843d0] text-white dark:bg-[#4338ca] dark:text-white";
+  if (value >= 95) return "bg-[#818cf8] text-white dark:bg-[#4f46e5] dark:text-white";
+  if (value >= 85) return "bg-[#c7d2fe] text-[#1e1b4b] dark:bg-[#312e81] dark:text-[#e0e7ff]";
+  return "bg-[#e0e7ff] text-[#3730a3] dark:bg-[#1e1b4b]/60 dark:text-[#c7d2fe]";
 }
 
-const LEGEND_TONES = [
-  "bg-[#f5d9d5] dark:bg-[#451d1d]",
-  "bg-[#e6e9fb] dark:bg-[#1a233d]",
-  "bg-[#c7d2fe] dark:bg-[#253358]",
-  "bg-[#7c8bb0] dark:bg-[#3b4f78]",
-  "bg-[#3b4f78] dark:bg-[#2e4063]",
-  "bg-[#0b1c30] dark:bg-[#152338]",
+const LEGEND_ITEMS = [
+  { label: "<80%", tone: "bg-[#e0e7ff] dark:bg-[#1e1b4b]/60" },
+  { label: "85%", tone: "bg-[#c7d2fe] dark:bg-[#312e81]" },
+  { label: "95%", tone: "bg-[#818cf8] dark:bg-[#4f46e5]" },
+  { label: "100%+", tone: "bg-[#3843d0] dark:bg-[#4338ca]" },
 ];
 
 export function RetentionMatrix() {
@@ -31,19 +29,26 @@ export function RetentionMatrix() {
 
   return (
     <Card className="min-w-0">
-      <CardHeader>
+      <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Customer cohort retention matrix</CardTitle>
-          <p className="mt-0.5 text-[12px] text-muted">Net MRR retained by cohort month, M0 through M11.</p>
+          <div className="flex items-center gap-2">
+            <CardTitle>Customer Cohort Retention Matrix</CardTitle>
+            <Badge variant="outline" className="border-primary/30 bg-primary/10 text-[10px] font-medium text-primary">
+              Net MRR Retained
+            </Badge>
+          </div>
+          <p className="mt-0.5 text-[12px] text-muted">
+            Tracking retained ARR percentage by monthly subscription cohort over 12 billing periods.
+          </p>
         </div>
-        <div className="hidden items-center gap-1.5 sm:flex">
-          <span className="text-[10px] uppercase tracking-[0.44px] text-muted">Churn risk (&lt;85%)</span>
-          <span className="flex overflow-hidden rounded-sm">
-            {LEGEND_TONES.map((tone) => (
-              <span key={tone} className={cn("size-3", tone)} aria-hidden="true" />
-            ))}
-          </span>
-          <span className="text-[10px] uppercase tracking-[0.44px] text-muted">Expansion (120%+)</span>
+        <div className="hidden items-center gap-2 sm:flex text-[11px] text-muted">
+          <span>Heat Map Range:</span>
+          {LEGEND_ITEMS.map((item) => (
+            <span key={item.label} className="inline-flex items-center gap-1">
+              <span className={cn("size-2.5 rounded-[2px]", item.tone)} aria-hidden="true" />
+              <span className="text-[10px] text-muted">{item.label}</span>
+            </span>
+          ))}
         </div>
       </CardHeader>
 
@@ -85,9 +90,13 @@ export function RetentionMatrix() {
                         "tnum flex h-8 items-center justify-center rounded-[4px] text-[11px] font-medium",
                         toneFor(value),
                       )}
-                      title={`${cohort.month} ${MONTHS[index]}: ${value}% net MRR retained`}
+                      title={
+                        value !== null
+                          ? `${cohort.month} ${MONTHS[index]}: ${value}% net MRR retained`
+                          : `${cohort.month} ${MONTHS[index]}: Unelapsed period`
+                      }
                     >
-                      {value}%
+                      {value !== null ? `${value}%` : "—"}
                     </span>
                   </td>
                 ))}
